@@ -61,7 +61,17 @@ public class MainClass {
 		FileOutputFormat.setOutputPath(job1, new Path(OUT_PATH2));
 		if (job1.waitForCompletion(true)) System.out.println("Job Two Completed");
 		
-
+	    Job job2=Job.getInstance(conf);
+		job2.setJarByClass(MainClass.class);
+		job2.setMapperClass(MapperThree.class);
+		job2.setReducerClass(ReducerThree.class);
+		job2.setOutputKeyClass(Text.class);
+		//job1.setOutputValueClass(Text.class);
+		//job1.setInputFormatClass(TextInputFormat.class);
+		job2.setOutputFormatClass(TextOutputFormat.class);
+		FileInputFormat.setInputPaths(job2, new Path(OUT_PATH2));
+		FileOutputFormat.setOutputPath(job2, new Path(args[1]));
+		if (job2.waitForCompletion(true)) System.out.println("Job Three Completed");
 	    
 	}
 	
