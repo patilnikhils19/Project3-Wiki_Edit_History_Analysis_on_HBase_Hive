@@ -1,0 +1,98 @@
+Project 03
+Author - Nikhil Patil
+
+
+Command to bulk upload data on Hbase
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+create 'correct1','cf'
+hbase org.apache.hadoop.hbase.mapreduce.ImportTsv -Dimporttsv.separator="," -Dimporttsv.columns=HBASE_ROW_KEY,cf:articleId,cf:userId,cf:revId,cf:articleTitle,cf:timeYear,cf:userName,cf:editCount,cf:userEditCount,cf:totalEditCount correctdata1 /dataResult1/part-r-00000
+
+Command to create table and upload data on Hive
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE EXTERNAL TABLE hive1(key INT, articleId STRING, userId STRING, revId STRING, articleTitle STRING, timeYear STRING, userName STRING, editCount STRING, userEditCount STRING, totalEditCount STRING) 
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,cf:articleId,cf:userId,cf:revId,cf:articleTitle,cf:timeYear,cf:userName,cf:editCount,cf:userEditCount,cf:totalEditCount')
+ TBLPROPERTIES ('hbase.table.name' = 'correct1');
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Table created on hive have parameters,
+
+key(Row Number) INT, articleId STRING, userId STRING, revId STRING, articleTitle STRING, timeYear STRING, userName STRING, editCount STRING, userEditCount STRING, totalEditCount STRING
+
+editCount = it content edit count for every occurance of article in corpus, calculated using Map Reduce (articleId as key).
+totalEditCount = it content total edit count for all occurances of article in corpus, calculated using Map Reduce (articleId as key).
+usereditCount = it content user edit count for every occurance of article for perticular user in corpus, calculated using Map Reduce (userId as key).
+
+Tasks
+
+Task 1: What is the top-10 list of most frequently edited pages (consider only edit counts)?
+Task 2: Who are the top-10 users that are performing edits (consider only edit counts)?
+Task 3: What is the percentage of pages that have had no edits since they were created?
+Task 4: What percentage of pages have had more than 30 edits since they were created?
+Task 5: What is the top-10 list of most frequently edited pages for the year 2008 (consider only edit counts)?
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Solution Queries
+
+1. select articleId, articleTitle, count(*) as editcount from hive2 group by articleId, articleTitle order by editcount desc limit 10;
+
+2. select userId, userName, count(*) as useredit from hive2 group by userId, userName order by useredit desc limit 10;
+
+3.	I. SELECT COUNT(editCount) AS noEdit FROM hive2 WHERE totalEditCount=1
+	J. SELECT COUNT(DISTINCT articleID) AS NumberOfArticle FROM hive2
+	
+4.	I. SELECT COUNT(editCount) AS noEdit FROM hive2 WHERE totalEditCount=31
+	J. SELECT COUNT(DISTINCT articleID) AS NumberOfArticle FROM hive2
+	
+5. select articleId, articleTitle, count(*) as editcount from hive2 where timeYear = '2008' group by articleId, articleTitle order by editcount desc limit 10;
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Answers
+
+1.
+711448	User:Liberlogos			1520
+304181	User:Tedius_Zanarukando	1340
+581003	User:MusiCitizen	1262
+867745	User:YUL89YYZ	1225
+952556	User:MisfitToys/List_of_celebrities_with_links_to_the_U.S._Republican_Party	1206
+249095	User:KF/For_future_reference	1183
+1147045	User:Vaoverland	1169
+1057077	User:Charles_Matthews/New_-_other	1090
+261000	User:Reddi	1070
+575077	User:Blankfaze	1064
+
+2.
+12978	Charles_Matthews	3381
+87355	Paul_August	3314
+57398	Blankfaze	2102
+57658	Antandrus	1845
+3602	KF	1791
+2030868	MetsBot	1754
+26995	Chris_73	1633
+73015	Liberlogos	1576
+36171	Davidcannon	1530
+8551	Angela	1341
+
+3.
+I. 5288
+J. 20505
+Answer = (I/J)*100 = 25.788%
+
+4.
+I. 2759
+J. 20505
+Answer = (I/J)*100	= 13.455%
+
+5.
+757500	User:PHG	46
+182384	User:Theresa_knott	14
+460875	User:Twilek	12
+997631	User:Fir0002	11
+645112	User:Kesac	10
+211144	User:Jeandré_du_Toit	9
+249095	User:KF/For_future_reference	9
+722241	User:Antandrus/To_do_list	8
+261000	User:Reddi	8
+304181	User:Tedius_Zanarukando	8
